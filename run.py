@@ -1,5 +1,4 @@
 #/usr/bin/env python
-print('yo')
 import nipype.pipeline.engine as pe
 from nipype.interfaces import ants
 import argparse
@@ -13,7 +12,9 @@ parser.add_argument('--fixed_image_mask', help='Mask for fixed image')
 parser.add_argument('--json_file',
                     default='linear_precise.json',
                     help='JSON-file to use for ANTS parameters')
-parser.add_argument('--n_threads', help='Number of threads to use.')
+parser.add_argument('--n_threads',
+                    type=int,
+                    help='Number of threads to use.')
 
 args = parser.parse_args()
 
@@ -23,7 +24,8 @@ moving_image = '/data/%s' % args.moving_image
 fixed_image = '/data/%s' % args.fixed_image
 
 json_pars = '/ants_json/%s' % args.json_file
-reg = pe.Node(ants.Registration(from_file=json_pars),
+reg = pe.Node(ants.Registration(from_file=json_pars,
+                                num_threads=args.n_threads),
               name='reg')
 
 if args.moving_image_mask:
@@ -39,10 +41,8 @@ else:
 
 reg.inputs.moving_image = moving_image
 reg.inputs.fixed_image = fixed_image
-
 reg.inputs.output_warped_image = True
-
-
+reg.inputs.verbose = True
 
 reg.base_directory = '/data'
 reg.run()
