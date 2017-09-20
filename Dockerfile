@@ -45,6 +45,9 @@ RUN pip install https://github.com/Gilles86/nipype/archive/ants_compose_multitra
     && pip install bottleneck \
     && pip install https://github.com/spinoza-centre/spynoza/archive/7t_hires.zip 
 
+RUN curl -sSL https://dl.dropbox.com/s/d2q9nxhh9ixiku9/lta_convert -o /usr/local/bin/lta_convert \
+    && chmod 700 /usr/local/bin/lta_convert
+
 ENV PATH=/usr/lib/fsl/5.0:/usr/lib/afni/bin:$PATH
 
 COPY ants_json /ants_json
@@ -53,3 +56,4 @@ RUN mkdir -p /code
 COPY run.py /code/run.py
 #RUN chmod +x /code/run.py
 ENTRYPOINT ["/opt/anaconda/bin/python", "/code/run.py"]
+
