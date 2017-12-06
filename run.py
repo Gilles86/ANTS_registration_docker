@@ -5,7 +5,7 @@ from nipype.interfaces import ants
 import argparse
 from bids.grabbids import BIDSLayout
 from spynoza.hires.workflows import init_hires_unwarping_wf
-from spynoza.io.bids import DerivativesDataSink
+from spynoza.io.bids_interfaces import DerivativesDataSink
 import os
 import os.path as op
 
@@ -77,10 +77,13 @@ parser.add_argument('--polish',
                     help='Whether to polish BOLD EPIs using non-linear regitration'
                     'to T1-weighted space',)
 
+parser.add_argument('--t1w',
+                    default=None,
+                    help='Define specific T1w to use')
 opts = parser.parse_args()
 
 
-layout = BIDSLayout('/data')
+layout = BIDSLayout(bids_dir)
 
 output_dir = op.abspath(opts.output_dir)
 log_dir = op.join(output_dir, 'logs')
@@ -129,8 +132,11 @@ else:
     t1w_epi = None
     inv2_epi = None
 
-t1w = layout.get('file', type='T1w')
-t1w = [fn for fn in t1w if 'epi' not in fn.lower()][0]
+if opts.t1w is None:
+    t1w = layout.get('file', type='T1w')
+    t1w = [fn for fn in t1w if 'epi' not in fn.lower()][0]
+else:
+    t1w = opts.t1w
 print("using %s as T1w-weighted structural image" % t1w)
 
 wf = init_hires_unwarping_wf(name="unwarp_hires",
