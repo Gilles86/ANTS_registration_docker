@@ -83,7 +83,7 @@ parser.add_argument('--t1w',
 opts = parser.parse_args()
 
 
-layout = BIDSLayout(bids_dir)
+layout = BIDSLayout(opts.bids_dir)
 
 output_dir = op.abspath(opts.output_dir)
 log_dir = op.join(output_dir, 'logs')
