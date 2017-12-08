@@ -28,8 +28,10 @@ parser.add_argument('--method',
                     default='topup',
                     help='Mask for fixed image')
 parser.add_argument('--use_one_fieldmap_for_all_runs',
-                    default='topup',
-                    help='Mask for fixed image')
+                    action='store_true',
+                    dest='single_warpfield',
+                    default=False,
+                    help='Whether to use only one fieldmap for all runs.')
 parser.add_argument('--n_procs',
                     default=4,
                     type=int,
@@ -142,7 +144,7 @@ print("using %s as T1w-weighted structural image" % t1w)
 wf = init_hires_unwarping_wf(name="unwarp_hires",
                             method=opts.method,
                             bids_layout=layout,
-                            single_warpfield=opts.use_one_fieldmap_for_all_runs,
+                            single_warpfield=opts.single_warpfield,
                             register_to='last',
                             init_reg_file=opts.init_reg_file,
                             linear_registration_parameters=opts.linear_registration_parameters,
@@ -160,14 +162,14 @@ wf = init_hires_unwarping_wf(name="unwarp_hires",
     
 wf.base_dir = work_dir
 
-ds_epi_to_t1w_transformed = pe.MapNode(DerivativesDataSink(base_directory='/out',
+ds_epi_to_t1w_transformed = pe.MapNode(DerivativesDataSink(base_directory=output_dir,
                                           suffix='epi_to_t1w'),
                               iterfield=['source_file', 'in_file'],
                       name='ds_epi_to_t1w_transformed')
 ds_epi_to_t1w_transformed.inputs.source_file = bold_epis
 wf.connect(wf.get_node('outputspec'), 'mean_epi_in_T1w_space', ds_epi_to_t1w_transformed, 'in_file')
 
-ds_epi_to_t1w_transforms = pe.MapNode(DerivativesDataSink(base_directory='/out',
+ds_epi_to_t1w_transforms = pe.MapNode(DerivativesDataSink(base_directory=output_dir,
                                           suffix='epi_to_t1w'),
                               iterfield=['source_file', 'in_file'],
                       name='ds_epi_to_t1w_transforms')
